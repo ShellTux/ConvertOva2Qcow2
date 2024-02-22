@@ -1,0 +1,23 @@
+#!/bin/sh
+set -e
+
+usage() {
+	echo "Usage: $(basename "$0") <ova file> <qcow2 file>"
+	exit 1
+}
+
+[ "$#" -ne 2 ] && usage
+
+set -x
+
+ova_file="$1"
+qcow2_file="$2"
+temp_dir="$(mktemp --directory)"
+tar -xvf "$ova_file" --directory="$temp_dir"
+qemu-img convert \
+	-f vmdk \
+	-O qcow2 \
+	"$(ls "$temp_dir"/*-disk001.vmdk)" \
+	"$qcow2_file"
+rm -r "$temp_dir"
+unset temp_dir
